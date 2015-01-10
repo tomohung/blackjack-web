@@ -1,18 +1,12 @@
 
 <p>Welcome Tomo Black Jack Game!! Input your name.</p>
 
-<% if !session[:username].nil? %>
-  <% if session[:username].empty? %>
-    invalid username
-  <% end %>
-<% end %>
-
 
 <form action="/set_name" method='post'>
 Player's Name:<br>
-<input type="text" name="username" value="Guest">
+<input type="text" name="username">
 <br>
 
-<input type="submit" class = 'btn'/>
+<input type="submit" value = "Submit"/>
 </form> 
 

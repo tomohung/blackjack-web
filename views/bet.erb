@@ -1,1 +1,16 @@
-bet
+
+Hello! 
+<%= session[:username] %>
+
+<br>
+
+You have <%= session[:capital] %><br>
+How much you want to bet?
+<form action="/set_bet" method='post'>
+
+  <input type="text" name="bet">
+  <br>
+
+  <button type="submit" class="btn btn-default">Submit</button>
+</form> 
+
