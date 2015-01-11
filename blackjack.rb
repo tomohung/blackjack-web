@@ -1,13 +1,13 @@
 module BlackJackRuler
   CARDS = { 
-    "A" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6, "7" => 7,
-    "8" => 8, "9" => 9, "10" => 10, "J" => 10, "Q" => 10, "K" => 10
+    "ace" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6, "7" => 7,
+    "8" => 8, "9" => 9, "10" => 10, "jack" => 10, "queen" => 10, "king" => 10
     }.freeze
 
-  SUITES = { "Club" => "♣", "Square" => "♦", "Heart" => "♥", "Spade" => "♠"}.freeze
+  SUITES = [ "clubs", "diamonds", "hearts", "spades"].freeze
   BLACKJACK = 21.freeze
 
-  STATUS = {win: "WIN", lose: "LOSE", tie: "TIE", unknown: ""}
+  STATUS = {win: "WIN", lose: "LOSE", tie: "TIE", unknown: ""}  
 end
 
 class Player
@@ -25,7 +25,7 @@ class Player
   def get_score
     value = 0
     cards.each {|card| value += BlackJackRuler::CARDS[card[1]]}
-    has_ace_card = !cards.select {|card| card[1] == "A"}.empty?
+    has_ace_card = !cards.select {|card| card[1] == "ace"}.empty?
     return value unless has_ace_card
     value + 10 > BlackJackRuler::BLACKJACK ? value : value + 10
   end
@@ -53,6 +53,15 @@ class Player
 
   def get_a_card(card)
     @cards << card
+  end
+
+  def cards_to_filenames
+    filenames = []
+    cards.each do |card|
+      filename = card[0] + "_" + card[1] + ".jpg"
+      filenames << filename
+    end
+    filenames
   end
 
 end
@@ -99,7 +108,7 @@ class Cards
   def initialize(poker_count = 1)
     @cards = []
     poker_count.times do 
-      BlackJackRuler::SUITES.values.each do |suite|
+      BlackJackRuler::SUITES.each do |suite|
         BlackJackRuler::CARDS.keys.each do |card|
           @cards.push([suite, card])
         end
@@ -137,6 +146,7 @@ class Deck
       cards.deal_a_card(player)
       cards.deal_a_card(dealer)
     end
+    check_status
   end
 
   def player_hit

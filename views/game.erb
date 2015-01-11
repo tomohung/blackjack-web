@@ -6,34 +6,39 @@
   <%= player.name %>, you bet <%= player.bet %>, capital is <%= player.capital %>
 </p>
 
+<div class = "well">
 <p>player's card:</p>
-<% player.cards.each do |card| %>
-  <%= card %>
+<% player.cards_to_filenames.each do |filename| %>
+  <% jpgname = "/images/cards/" + filename %>
+  <img src=<%=jpgname%> alt= <%=filename%> style="width:128px;height:200px">
 <% end %>
 <p> score = <%= player.get_score %> </p>
+</div>
 
+<div class = "well">
 <p>dealer's card:</p>
-<% dealer.cards.each do |card| %>
-  <%= card %>
+<% dealer.cards_to_filenames.each_with_index do |filename, index| %>
+  <% jpgname = index > 0 || deck.dealer_turn ? "/images/cards/" + filename : "/images/cards/cover.jpg" %>
+  <img src=<%=jpgname%> alt= <%=filename%> style="width:128px;height:180px">
 <% end %>
-<p> score = <%= dealer.get_score %> </p>
-
+<p> score = <%= deck.dealer_turn ? dealer.get_score : "unknown"%> </p>
+</div>
 
 <% if deck.game_is_over %>
   <% if player.status == BlackJackRuler::STATUS[:win] %>
-    <p> <%= player.name %>, you win! </p>
+    <h2> <%= player.name %>, you win! </h2>
   <% elsif player.status == BlackJackRuler::STATUS[:tie] %>
-    <p> <%= player.name %>, it's a tie. </p>
+    <h2> <%= player.name %>, it's a tie. </h2>
   <% elsif player.status == BlackJackRuler::STATUS[:lose] %>
-    <p> <%= player.name %>, you are loser... </p>
+    <h2> <%= player.name %>, you are loser... </h2>
   <% else %>
-    <p> something wrong </p>
+    <h2> something wrong </h2>
   <% end %>
+  <p> capital = <%= player.capital %> </p>
 
   <form action = '/bet' method='get'>
   <button type="submit" class="btn btn-default">Again</button>
   </form>
-
 
 <% else %>
   <% if deck.dealer_turn %>
