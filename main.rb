@@ -3,7 +3,11 @@ require 'pry'
 require './blackjack.rb'
 
 #use Rack::Session::Pool, :expire_after => 2592000
-enable :sessions
+#enable :sessions
+use Rack::Session::Cookie, :key => 'rack.session',
+                           :path => '/',
+                           :secret => 'tealeafweek3' 
+
 
 get '/' do
   redirect '/login'
