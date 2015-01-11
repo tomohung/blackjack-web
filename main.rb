@@ -19,37 +19,48 @@ end
 
 post '/set_name' do
   redirect '/login' if params[:username].empty?
-  session[:username] = params[:username]
-  session[:capital] = 500
+
+  player = Player.new(params[:username])
+  deck = Deck.new(player)
+  session[:deck] = deck
+
   redirect '/bet'
 end
 
 post '/set_bet' do  
-  redirect '/bet' if params[:bet].to_i < 1
-  session[:bet] = params[:bet].to_i
-  session[:capital] -= params[:bet].to_i
+  
+  deck = session[:deck]
+  player = deck.player
+  redirect '/game' if !deck.game_is_over
 
-  player = Player.new(session[:username])
-  deck = Deck.new(player)
+  bet = params[:bet].to_i
+  redirect '/bet' if bet < 1 # bet must larger than 0
+  
   deck.deal_initial_cards_to_everyone
-  session[:deck] = deck
+  player.bet = bet
+  player.capital -= bet
 
   redirect '/game'
 end
 
 get '/game' do
-
   erb :game
 end
 
-get '/hit_or_stay' do
-  if params.has_key?("hit")
-    deck = session[:deck]
-    deck.cards.deal_a_card(deck.players.first)
-    redirect '/game'
-  end
+post '/hit' do
+  deck = session[:deck]
+  deck.player_hit
+  redirect '/game'
+end
 
-  if params.has_key?("stay")
+post '/stay' do
+  session[:deck].dealer_turn = true
+  redirect '/game'
+end
 
-  end
+post '/ask_dealer' do
+  deck = session[:deck]
+  deck.asking_dealer_hit_again?
+
+  redirect '/game'
 end

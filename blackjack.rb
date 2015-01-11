@@ -11,13 +11,15 @@ module BlackJackRuler
 end
 
 class Player
-  attr_accessor :cards, :status
+  attr_accessor :cards, :status, :capital, :bet
   attr_reader :name
 
   def initialize(name)
     @name = name
     @status = BlackJackRuler::STATUS[:unknown]
     @cards = []
+    @capital = 1000
+    @bet = 0
   end
 
   def get_score
@@ -40,6 +42,7 @@ class Player
   def reset
     @cards.clear
     @status = BlackJackRuler::STATUS[:unknown]
+    @bet = 0
   end
 
   def hit?
@@ -70,31 +73,22 @@ class RobotPlayer < Player
 end
 
 class Dealer < RobotPlayer
-  attr_accessor :players
+  attr_accessor :player
 
-  def initialize(name, players)
+  def initialize(name, player)
     super(name)
-    @players = players
+    @player = player
   end
 
   def hit?
     return false if busted? || blackjack?
-
-    print "Now, Dealer's Action."
-    2.times do
-      sleep 1
-      print "."
-    end
-    puts ""
-    
     return true if get_score < 17
+
     result = false
-    players.each do |player|
-      if player.status == BlackJackRuler::STATUS[:unknown] &&
-        get_score < player.get_score
-        result = true
-      end    
-    end
+    if player.status == BlackJackRuler::STATUS[:unknown] &&
+      get_score < player.get_score
+      result = true
+    end    
     result
   end
 end
@@ -120,178 +114,80 @@ class Cards
 end
 
 class Deck
-  attr_accessor :dealer, :players, :cards, :current_player_index, :dealer_stop_hit
-  def initialize(players)
-    @players = []
-    @players << players
-    @dealer = Dealer.new("Dealer", players)
+  attr_accessor :dealer, :player, :cards, :dealer_turn, :game_is_over
+  def initialize(player)
+    @player = player
+    @dealer = Dealer.new("Dealer", player)
     @cards = Cards.new
-    @current_player_index = 0
-    @dealer_stop_hit = false
+    @game_is_over = true
+    @dealer_turn = false
   end
 
   def reset
-    @dealer.reset
+    dealer.reset
     @cards = Cards.new
-    @players.each {|player| player.reset}
-    @current_player_index = 0
-    @dealer_stop_hit = false
+    player.reset
+    @game_is_over = false
+    @dealer_turn = false
   end
 
   def deal_initial_cards_to_everyone
     reset
     2.times do 
-      players.each do |player|
-        cards.deal_a_card(player)
-      end
+      cards.deal_a_card(player)
       cards.deal_a_card(dealer)
     end
   end
 
-  def asking_player_hit_again?
-    return false if current_player_index >= players.size
-    player = players[current_player_index]
-    if player.hit?
-      cards.deal_a_card(player)
-    else
-      @current_player_index += 1
-    end
+  def player_hit
+    cards.deal_a_card(player)
+    check_status
   end
 
   def asking_dealer_hit_again?
-    if !dealer.hit?
-      @dealer_stop_hit = true
-      return false
-    end
-    cards.deal_a_card(dealer)
+    cards.deal_a_card(dealer) if dealer.hit?
+    check_status
   end
 
-  def update_status
-
-    players.each do |player|
-      if player.status == BlackJackRuler::STATUS[:unknown]
-        
-        player.status = BlackJackRuler::STATUS[:lose] if player.busted?
-        player.status = BlackJackRuler::STATUS[:win] if player.blackjack?
-        
-        next unless dealer_stop_hit
-
-        if dealer.busted?
-          player.status = BlackJackRuler::STATUS[:win] 
-        
-        elsif player.get_score < dealer.get_score
-          player.status = BlackJackRuler::STATUS[:lose]
-           
-        elsif player.get_score > dealer.get_score
-          player.status = BlackJackRuler::STATUS[:win]
-
-        elsif player.get_score == dealer.get_score
-          player.status = BlackJackRuler::STATUS[:tie] if !player.blackjack?
-        end
-      end
-    end
-  end
-
-
-  def show(hidden_card = true)
-    system("clear")
-    puts "<----------------  [ DECK ]  ----------------->"
-    puts ""
-
-    format_string = "%16s"
-
-    print format_string % dealer.name
-    players.each_with_index do |player, index|
-      print_string = (index == current_player_index ? "-> " : "") + player.name
-      print format_string % print_string
-    end
-    puts ""
-
-    count = dealer.cards.size
-    players.each do |player| 
-      if player.cards.size > count 
-        count = player.cards.size
-      end
-    end
-
-    count.times do |index|
-      if index == 1 && hidden_card
-        print format_string % "[*hidden*]"
-      else
-        print format_string % dealer.cards[index].to_s
-      end
-
-      players.each do |player| 
-        print format_string % player.cards[index].to_s
-      end
-      puts ""
-    end
-
-    puts "\n"
-    print format_string % (hidden_card ? "" : dealer.get_score)
-    players.each {|player| print format_string % player.get_score}
-
-    puts "\n"
-    print format_string % ""
-    players.each {|player| print format_string % player.status}
-
-    puts "\n"
-    puts "<--------------------------------------------->"
-  end
-
-end
-
-class BlackJackGame
-  attr_accessor :deck, :players
-
-  def initialize
-    @players = []
-    create_players
-    @deck = Deck.new(@players)
-  end
-
-  def say(message)
-    puts "=> #{message}"
-  end
-
-  def create_players
-    players.clear
-    say "Players count: (1 ~ 4)"
-    players_count = gets.chomp.to_i until (1..4).include?(players_count)
+  def check_status
+    player.status = BlackJackRuler::STATUS[:win] if player.blackjack?
+    player.status = BlackJackRuler::STATUS[:lose] if player.busted?
     
-    say "Player's name:"
-    player_name = gets.chomp
-    player_name = "Player" if player_name.empty?
-    @players << Player.new(player_name)
-
-    (players_count - 1).times do |index|
-      player_name = "NPC-#{index + 1}"
-      @players << RobotPlayer.new(player_name)
+    if dealer_turn
+      player.status = BlackJackRuler::STATUS[:lose] if dealer.blackjack?
+      player.status = BlackJackRuler::STATUS[:win] if dealer.busted?
     end
-  end
 
-  def play
-    
-    loop do
-      deck.deal_initial_cards_to_everyone
+    if player.blackjack? ||
+      player.busted? ||
+      dealer.busted?
+      @game_is_over = true
+      refund
+      return
+    end
+
+    if dealer_turn
+      if player.get_score < dealer.get_score
+        player.status = BlackJackRuler::STATUS[:lose]
+        @game_is_over = true
+      end
       
-      hidden_dealer_card = true
-      loop do 
-        deck.show(hidden_dealer_card)
-
-        if !deck.asking_player_hit_again?
-          hidden_dealer_card = false
-          break if !deck.asking_dealer_hit_again?
-        end
-
-        deck.update_status
+      if !dealer.hit? && player.get_score == dealer.get_score
+        player.status = BlackJackRuler::STATUS[:tie] 
+        @game_is_over = true
       end
-
-      deck.update_status
-      deck.show(hidden_dealer_card)
-
-      say "Play again? (y/n)"
-      break if gets.chomp.downcase == 'n'
     end
+    refund
+  end
+
+  def refund
+    if game_is_over
+      case player.status
+      when BlackJackRuler::STATUS[:win]
+        player.capital += 2 * player.bet
+      when BlackJackRuler::STATUS[:tie]
+        player.capital += player.bet
+      end
+    end 
   end
 end

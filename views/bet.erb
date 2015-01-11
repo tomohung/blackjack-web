@@ -1,16 +1,12 @@
 
-Hello! 
-<%= session[:username] %>
+<% player = session[:deck].player %>
+<h4>Hello! <%= player.name %></h4>
 
-<br>
+<p> You have <%= player.capital %> </p>
+<p> How much you want to bet? </p>
 
-You have <%= session[:capital] %><br>
-How much you want to bet?
 <form action="/set_bet" method='post'>
-
-  <input type="text" name="bet">
-  <br>
-
+  <input type="text" name="bet" autofocus>
   <button type="submit" class="btn btn-default">Submit</button>
 </form> 
 

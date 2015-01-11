@@ -1,33 +1,55 @@
+<% deck = session[:deck] %>
+<% player = deck.player %>
+<% dealer = deck.dealer %>
 
 <p>
-<%= session[:username] %>, you bet <%= session[:bet] %>, capital is <%= session[:capital] %>
+  <%= player.name %>, you bet <%= player.bet %>, capital is <%= player.capital %>
 </p>
 
 <p>player's card:</p>
-
-<% player = session[:deck].players[0] %>
-<% cards = player.cards %>
-<% cards.each do |card| %>
+<% player.cards.each do |card| %>
   <%= card %>
 <% end %>
-<p>
-score = <%= player.get_score %>
-</p>
+<p> score = <%= player.get_score %> </p>
 
 <p>dealer's card:</p>
-<% dealer = session[:deck].dealer %>
-<% cards = dealer.cards %>
-<% cards.each do |card| %>
+<% dealer.cards.each do |card| %>
   <%= card %>
 <% end %>
-<p>
-score = <%= dealer.get_score %>
-</p>
+<p> score = <%= dealer.get_score %> </p>
 
 
-<form action = '/hit_or_stay'>
-<div class="btn-group" role="group" aria-label="...">
-  <button type="submit" class="btn btn-default" name="hit">Hit</button>
-  <button type="submit" class="btn btn-default" name="stay">Stay</button>
-</div>
-</form>
+<% if deck.game_is_over %>
+  <% if player.status == BlackJackRuler::STATUS[:win] %>
+    <p> <%= player.name %>, you win! </p>
+  <% elsif player.status == BlackJackRuler::STATUS[:tie] %>
+    <p> <%= player.name %>, it's a tie. </p>
+  <% elsif player.status == BlackJackRuler::STATUS[:lose] %>
+    <p> <%= player.name %>, you are loser... </p>
+  <% else %>
+    <p> something wrong </p>
+  <% end %>
+
+  <form action = '/bet' method='get'>
+  <button type="submit" class="btn btn-default">Again</button>
+  </form>
+
+
+<% else %>
+  <% if deck.dealer_turn %>
+    <p> Dealer's turn </p>
+    <form action = '/ask_dealer' method='post'>
+    <button type="submit" class="btn btn-default">Ask Dealer</button>
+    </form>
+  <% else %>
+    <p> Player's turn </p>
+    <div class="btn-group" role="group" aria-label="...">
+      <form action = '/hit' method='post'>
+      <button type="submit" class="btn btn-default">Hit</button>
+      </form>
+      <form action = '/stay' method='post'>
+      <button type="submit" class="btn btn-default">Stay</button>
+      </form>
+    </div>
+  <% end %>
+<% end %>
