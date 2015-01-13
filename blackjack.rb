@@ -175,7 +175,10 @@ class Deck
       refund
       return
     end
+    compare_dealer_player
+  end
 
+  def compare_dealer_player
     if dealer_turn
       if player.get_score < dealer.get_score
         player.status = BlackJackRuler::STATUS[:lose]
@@ -186,8 +189,8 @@ class Deck
         player.status = BlackJackRuler::STATUS[:tie] 
         @game_is_over = true
       end
+      refund
     end
-    refund
   end
 
   def refund
