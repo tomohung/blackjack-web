@@ -67,7 +67,7 @@ post '/set_bet' do
   player.bet = bet
   player.capital -= bet
 
-  erb :game
+  redirect '/game'
 end
 
 get '/game' do
