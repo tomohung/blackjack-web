@@ -168,17 +168,21 @@ class Deck
       player.status = BlackJackRuler::STATUS[:win] if dealer.busted?
     end
 
+    return if stop_game_if_blackjack_or_busted?
+    compare_dealer_and_player
+  end
+
+  def stop_game_if_blackjack_or_busted?
     if player.blackjack? ||
       player.busted? ||
       dealer.busted?
       @game_is_over = true
       refund
-      return
     end
-    compare_dealer_player
+    false
   end
 
-  def compare_dealer_player
+  def compare_dealer_and_player
     if dealer_turn
       if player.get_score < dealer.get_score
         player.status = BlackJackRuler::STATUS[:lose]

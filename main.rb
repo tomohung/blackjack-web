@@ -10,7 +10,7 @@ use Rack::Session::Cookie, :key => 'rack.session',
 
 
 helpers do 
-  def check_status
+  def output_message_if_game_over
     deck = session[:deck]
     return unless deck.game_is_over
     player = deck.player
@@ -71,7 +71,7 @@ post '/set_bet' do
 end
 
 get '/game' do
-  check_status
+  output_message_if_game_over
   erb :game
 end
 
