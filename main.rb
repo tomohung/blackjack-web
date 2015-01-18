@@ -78,7 +78,7 @@ end
 post '/hit' do
   deck = session[:deck]
   deck.player_hit
-  redirect "/game"
+  erb :game
 end
 
 post '/stay' do

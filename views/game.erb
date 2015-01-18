@@ -2,6 +2,8 @@
 <% player = deck.player %>
 <% dealer = deck.dealer %>
 
+<div id="game">
+
 <% if @success.nil? && @error.nil? %>
 <h4>
   <%= player.name %>, you bet <%= player.bet %>, now capital become <%= player.capital %>
@@ -52,3 +54,5 @@
     </div>
   <% end %>
 <% end %>
+
+</div>
