@@ -170,6 +170,7 @@ class Deck
 
     if player.status != BlackJackRuler::STATUS[:unknown]
       @game_is_over = true
+      refund
       return 
     end
     
