@@ -78,16 +78,19 @@ end
 post '/hit' do
   deck = session[:deck]
   deck.player_hit
+  output_message_if_game_over
   erb :game
 end
 
 post '/stay' do
   session[:deck].dealer_turn = true
-  redirect "/game"
+  output_message_if_game_over
+  erb :game
 end
 
 post '/ask_dealer' do
   deck = session[:deck]
   deck.asking_dealer_hit_again?
-  redirect "/game"
+  output_message_if_game_over
+  erb :game
 end

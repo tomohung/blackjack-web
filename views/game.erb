@@ -1,8 +1,8 @@
+<div id="game">
+  
 <% deck = session[:deck] %>
 <% player = deck.player %>
 <% dealer = deck.dealer %>
-
-<div id="game">
 
 <% if @success.nil? && @error.nil? %>
 <h4>
@@ -31,15 +31,15 @@
 
 <% if deck.game_is_over %>
   <h4>Play again?</h4>
-  <form id="hit_form" action = '/bet' method='get'>
+  <form id="again_form" action = '/bet' method='get'>
     <button type="submit" class="btn btn-info">Yes</button>
   </form>
-  <form id="stay_form" action = '/login' method='get'>
+  <form id="home_form" action = '/login' method='get'>
     <button type="submit" class="btn btn-danger">No</button>
   </form>
 <% else %>
   <% if deck.dealer_turn %>
-    <form action = '/ask_dealer' method='post'>
+    <form id="dealer_form" action = '/ask_dealer' method='post'>
     <button type="submit" class="btn btn-primary">Dealer turn -></button>
     </form>
   <% else %>
