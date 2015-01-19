@@ -4,20 +4,42 @@
 <% player = deck.player %>
 <% dealer = deck.dealer %>
 
-<% if @success.nil? && @error.nil? %>
-<h4>
-  <%= player.name %>, you bet <%= player.bet %>, now capital become <%= player.capital %>
-</h4>
+<% if !@winner && !@loser %>
+<div class="alert alert-warning">
+  bet => <%= player.bet %>; capital => <%= player.capital %>
+</div>
+<%end%>
+
+<% if @winner %>
+  <div class="alert alert-success"><%= @winner%></div>
+<% elsif @loser %>
+  <div class="alert alert-error"><%=@loser%></div>
 <% end %>
 
-<div class = "well">
-  <h4>dealer's card:</h4>
-    <% dealer.cards_to_filenames.each_with_index do |filename, index| %>
-      <% jpgname = index > 0 || deck.dealer_turn ? "/images/cards/" + filename : "/images/cards/cover.jpg" %>
-      <img src=<%=jpgname%> alt= <%=filename%> style="width:100px;height:140px" class="card_image">
-    <% end %>
-  <h4> score = <%= deck.dealer_turn ? dealer.get_score : "unknown"%> </h4>
-</div>
+
+<% if deck.game_is_over %>
+  <form>
+    <h4>Play again?</h4>
+    <a href='/bet' class='btn btn-success'>Yes</a>
+    <a href='/' class='btn btn-warning'>No</a>
+  </form>
+<% else %>
+  <% if deck.dealer_turn %>
+    <form id="dealer_form" action = '/ask_dealer' method='post'>
+      <button type="submit" class="btn btn-primary">Dealer turn -></button>
+    </form>
+  <% else %>
+    <p> Player's turn </p>
+    <div class="btn-group" role="group" aria-label="...">
+      <form id = "hit_form" action = '/hit' method='post'>
+        <button type="submit" class="btn btn-success">Hit</button>
+      </form>
+      <form  id = "stay_form" action = '/stay' method='post'>
+        <button type="submit" class="btn btn-warning">Stay</button>
+      </form>
+    </div>
+  <% end %>
+<% end %>
 
 <div class = "well">
   <h4>player's card:</h4>
@@ -29,30 +51,14 @@
 </div>
 
 
-<% if deck.game_is_over %>
-  <h4>Play again?</h4>
-  <form id="again_form" action = '/bet' method='get'>
-    <button type="submit" class="btn btn-info">Yes</button>
-  </form>
-  <form id="home_form" action = '/login' method='get'>
-    <button type="submit" class="btn btn-danger">No</button>
-  </form>
-<% else %>
-  <% if deck.dealer_turn %>
-    <form id="dealer_form" action = '/ask_dealer' method='post'>
-    <button type="submit" class="btn btn-primary">Dealer turn -></button>
-    </form>
-  <% else %>
-    <p> Player's turn </p>
-    <div class="btn-group" role="group" aria-label="...">
-      <form id = "hit_form" action = '/hit' method='post'>
-      <button type="submit" class="btn btn-success">Hit</button>
-      </form>
-      <form  id = "stay_form" action = '/stay' method='post'>
-      <button type="submit" class="btn btn-warning">Stay</button>
-      </form>
-    </div>
-  <% end %>
-<% end %>
+<div class = "well">
+  <h4>dealer's card:</h4>
+    <% dealer.cards_to_filenames.each_with_index do |filename, index| %>
+      <% jpgname = index > 0 || deck.dealer_turn ? "/images/cards/" + filename : "/images/cards/cover.jpg" %>
+      <img src=<%=jpgname%> alt= <%=filename%> style="width:100px;height:140px" class="card_image">
+    <% end %>
+  <h4> score = <%= deck.dealer_turn ? dealer.get_score : "unknown"%> </h4>
+</div>
+
 
 </div>

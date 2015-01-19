@@ -12,23 +12,21 @@ use Rack::Session::Cookie, :key => 'rack.session',
 helpers do 
   def output_message_if_game_over
     deck = session[:deck]
-    return unless deck.game_is_over
+    return false unless deck.game_is_over
+
     player = deck.player
     if player.status == BlackJackRuler::STATUS[:win] 
-      @success = "#{player.name} , you win!"
+      @winner = "#{player.name} , you win!"
     elsif player.status == BlackJackRuler::STATUS[:tie]
-      @success = "#{player.name}, it's a tie."
+      @winner = "#{player.name}, it's a tie."
     elsif player.status == BlackJackRuler::STATUS[:lose]
-      @error = "Oops! #{player.name}, you are loser..."
+      @loser = "Oops! #{player.name}, you are loser..."
     end
+    true
   end
 end
 
 get '/' do
-  redirect '/login'
-end
-
-get '/login' do
   erb :login
 end
 
@@ -79,18 +77,18 @@ post '/hit' do
   deck = session[:deck]
   deck.player_hit
   output_message_if_game_over
-  erb :game
+  erb :game, layout: false
 end
 
 post '/stay' do
   session[:deck].dealer_turn = true
   output_message_if_game_over
-  erb :game
+  erb :game, layout: false
 end
 
 post '/ask_dealer' do
   deck = session[:deck]
   deck.asking_dealer_hit_again?
   output_message_if_game_over
-  erb :game
+  erb :game, layout: false
 end

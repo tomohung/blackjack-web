@@ -26,7 +26,7 @@ $(document).ready(function(){
       type: 'POST',
       url: '/ask_dealer'
     }).done(function(message){
-      //alert("dealer ajax trigger");
+      //alert(message);
       $('#game').replaceWith(message);
     });
     return false;

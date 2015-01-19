@@ -14,10 +14,13 @@
       <div class="navbar-inner">
         <div class="container">
             <ul class="nav">
-              <li><a href="/">Start Over</a></li>
+              <li><a href="/">Start a New Game</a></li>
             </ul>
         </div>
       </div>
+      <% if session[:deck] %>
+        Hello! <%=session[:deck].player.name%>
+      <% end %>
     </div>
 
   <div class="container">
